@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pri Massas Artesanais - Cardápio</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #fdf8f5; color: #333; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #8b0000; text-align: center; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
+        button { background-color: #2e8b57; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #246b43; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .massa-item { background: #fff3e0; margin: 10px 0; padding: 15px; border-left: 5px solid #ff8c00; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍝 Pri Massas Artesanais</h1>
+        
+        <h3>Cadastrar Nova Massa</h3>
+        <input type="text" id="nomeMassa" placeholder="Nome da Massa (Ex: Nhoque ao Sugo)">
+        <input type="number" id="precoMassa" placeholder="Preço (Ex: 45.90)">
+        <button id="btnSalvar" onclick="salvarMassa()">Adicionar ao Cardápio</button>
+
+        <h3>Cardápio Atual</h3>
+        <div id="listaMassas">
+            <p style="text-align: center; color: #666;">Carregando cardápio...</p>
+        </div>
+    </div>
+
+    <script>
+    const API = "https://primassas-api.onrender.com/api/produtos";
+    
+    // Carregar produtos
+    async function carregarProdutos() {
+        try {
+            const resposta = await fetch(API);
+            const produtos = await resposta.json();
+            
+            const lista = document.getElementById('listaMassas');
+            if (!lista) return;
+            
+            if (produtos.length === 0) {
+                lista.innerHTML = '<p style="text-align:center;">Nenhum produto cadastrado</p>';
+                return;
+            }
+            
+            lista.innerHTML = produtos.map(p => `
+                <div class="massa-item">
+                    <div>
+                        <strong>${p.nome}</strong> - R$ ${p.preco.toFixed(2)}
+                        ${p.quantidade ? `<br><small>Estoque: ${p.quantidade}</small>` : ''}
+                    </div>
+                    <button onclick="apagarProduto('${p._id}')" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; width: auto;">
+                        🗑️ Apagar
+                    </button>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error("Erro:", error);
+            document.getElementById('listaMassas').innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar do servidor</p>';
+        }
+    }
+    
+    // Salvar produto com trava anti-duplicação
+    async function salvarMassa() {
+        const nome = document.getElementById('nomeMassa').value;
+        const preco = document.getElementById('precoMassa').value;
+        const btn = document.getElementById('btnSalvar');
+        
+        if (!nome || !preco) {
+            alert("Preencha nome e preço!");
+            return;
+        }
+        
+        // Trava o botão
+        btn.disabled = true;
+        btn.textContent = "Salvando (Aguarde)...";
+        
+        try {
+            await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, preco: Number(preco) })
+            });
+            
+            document.getElementById('nomeMassa').value = '';
+            document.getElementById('precoMassa').value = '';
+            await carregarProdutos();
+            alert("Produto cadastrado com sucesso!");
+            
+        } catch (error) {
+            alert("Erro ao salvar: Verifique a conexão com o servidor.");
+        } finally {
+            // Libera o botão novamente
+            btn.disabled = false;
+            btn.textContent = "Adicionar ao Cardápio";
+        }
+    }
+    
+    // Apagar produto de forma segura
+    async function apagarProduto(id) {
+        if (!confirm("⚠️ Tem certeza que deseja apagar este produto?")) {
+            return;
+        }
+        
+        try {
+            const resposta = await fetch(`${API}/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (resposta.ok) {
+                await carregarProdutos(); // Recarrega a lista sem dar alertas obstrutivos
+            } else {
+                const erro = await resposta.json();
+                alert("❌ Erro: " + (erro.mensagem || "Não foi possível apagar"));
+            }
+        } catch (error) {
+            console.error("Erro no DELETE:", error);
+            alert("❌ Erro de conexão com o servidor.");
+        }
+    }
+    
+    // Iniciar a listagem ao abrir a página
+    carregarProdutos();
+    </script>
+</body>
+</html>

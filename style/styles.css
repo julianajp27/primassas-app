@@ -1,0 +1,74 @@
+/* style/style.css */
+:root {
+    --vinho: #8b0000;
+    --laranja: #ff8c00;
+    --fundo: #fdf8f5;
+    --verde: #2e8b57;
+}
+
+body { 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    
+    /* Configuração exata para a sua imagem */
+    background-image: url('../images/massas.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    
+    background-color: var(--fundo); 
+    margin: 0; 
+    padding: 20px; 
+    display: flex; 
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.container { 
+    width: 100%; 
+    max-width: 500px; 
+    
+    /* Fundo branco levemente transparente para a imagem aparecer */
+    background: rgba(255, 255, 255, 0.90); 
+    backdrop-filter: blur(5px); 
+    
+    padding: 30px; 
+    border-radius: 15px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+}
+
+h1 { color: var(--vinho); text-align: center; margin-bottom: 30px; }
+
+/* Formulário Empilhado (Melhor para Celular) */
+.form-cadastro { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+
+input { 
+    padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; 
+    transition: border-color 0.3s;
+}
+
+input:focus { border-color: var(--laranja); outline: none; }
+
+button { 
+    padding: 15px; background-color: var(--verde); color: white; 
+    border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+    font-size: 16px; transition: transform 0.2s;
+}
+
+button:active { transform: scale(0.98); }
+
+/* Itens do Cardápio */
+.massa-item { 
+    background: #fff; margin: 10px 0; padding: 15px; 
+    border-radius: 10px; border: 1px solid #eee;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.02);
+}
+
+.massa-item strong { color: var(--vinho); }
+
+/* Responsividade */
+@media (max-width: 480px) {
+    .container { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+}
